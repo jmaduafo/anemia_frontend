@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   education,
   occupation,
@@ -45,8 +45,8 @@ function Prediction() {
     gender: "Male",
     hemoglobin: "",
   });
-  const [prediction, setPrediction] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
+  const [prediction, setPrediction] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const options = ["Yes", "No"];
 
