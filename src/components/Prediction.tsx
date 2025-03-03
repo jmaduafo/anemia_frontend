@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import {
   education,
@@ -47,6 +47,7 @@ function Prediction() {
     hemoglobin: "",
   });
   const [prediction, setPrediction] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const options = ["Yes", "No"];
@@ -77,7 +78,11 @@ function Prediction() {
     "<25,000": 5,
   };
 
-  const datareligion: Record<string, number> = { Christian: 0, Muslim: 1, Other: 2 };
+  const datareligion: Record<string, number> = {
+    Christian: 0,
+    Muslim: 1,
+    Other: 2,
+  };
 
   const datatribe: Record<string, number> = { Hausa: 0, Igbo: 1, Yoruba: 2 };
 
@@ -107,16 +112,39 @@ function Prediction() {
     Others: 3,
   };
 
-  const datasanitation: Record<string, number> = { "Flush toilet": 0, "Pit latrine": 1, None: 2 };
+  const datasanitation: Record<string, number> = {
+    "Flush toilet": 0,
+    "Pit latrine": 1,
+    None: 2,
+  };
 
-  const datasource: Record<string, number> = { Borehole: 0, "Tap water": 1, Well: 2 };
+  const datasource: Record<string, number> = {
+    Borehole: 0,
+    "Tap water": 1,
+    Well: 2,
+  };
 
-  const datarefuse: Record<string, number> = { Daily: 0, Weekly: 1, "Twice Weekly": 2 };
+  const datarefuse: Record<string, number> = {
+    Daily: 0,
+    Weekly: 1,
+    "Twice Weekly": 2,
+  };
+
+  function printAnemiaStatus(num: number) {
+    if (num === 0) {
+        return "Normal / No Anemia"
+    } else if (num === 1) {
+        return "Mild / Moderate Anemia"
+    } else {
+        return "Severe Anemia"
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     setPrediction("");
+    setError("");
 
     const form = {
       Age: Number(formData.age), // Convert to integer
@@ -150,24 +178,27 @@ function Prediction() {
       Hemoglobin: Number(formData.hemoglobin),
     };
 
-    console.log(form)
-
     setLoading(true);
 
     try {
-      const res = await fetch("https://anemia-backend-gmmx.onrender.com/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        "https://anemia-backend-gmmx.onrender.com/predict",
+        // "http://127.0.0.1:8000/predict",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }
+      );
 
       const data = await res.json();
-      
-      setPrediction(data.anemia);
-    } catch (err: any) {
+
       setPrediction(
-        "There was trouble receiving your prediction: " + err.message
+        printAnemiaStatus(data.anemia) as string
       );
+
+    } catch (err: any) {
+      setError("There was trouble receiving your prediction: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -641,11 +672,16 @@ function Prediction() {
           {loading ? "Loading..." : "Predict"}
         </button>
       </form>
-      {prediction && (
+      {prediction.length ? (
         <p className="text-lg text-center mt-4 text-black">
-          Prediction: {prediction === "true" ? "Anemia is high" : "No anemia / normal" }
+          Prediction: {prediction}
         </p>
-      )}
+      ) : null}
+      {error.length ? (
+        <p className="text-lg text-center mt-4 text-black">
+          Error: {error}
+        </p>
+      ) : null}
     </div>
   );
 }
